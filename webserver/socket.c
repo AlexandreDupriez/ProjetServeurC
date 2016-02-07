@@ -54,14 +54,16 @@ write(socket_client, &recup, strlen(recup));
 
 while(1){
 	int fd;
-	char buf[800000];
+	char buf[512];
 	if((fd = read(socket_client, buf, sizeof(buf)))==-1){
 
 		perror("erreur de lecture");
+		return 1;
 
 	} 
+	buf[511] = '\0';
 
-	write(socket_client, buf, sizeof(fd));
+	write(socket_client, buf, fd);
 }
 
 
