@@ -15,9 +15,6 @@ printf("Need an advice ?\n");
 if(creer_serveur(8080) == -1){
 
 perror("erreur creer_serveur");
-
 }
-
-
 return 0;
 }
