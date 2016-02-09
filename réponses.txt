@@ -1,0 +1,7 @@
+1. On obtient le message d'erreur "bind socket_serveur", ce qui signifie que la socket n'a pu être créée. Il y a un délai d'attente pour pouvoir relancer le serveur. 
+
+2. Rien ne s'affiche car l'option "z" signifie que le client va uniquement scanner l'existence du serveur sans envoyer de données.
+
+3. Telnet ne fonctionne pas sur les ordinateurs de l'iut, nous le testerons plus tard.
+
+4. Lorsqu'on lance simultanément deux clients sur le serveur, le premier qui se connecte voit ses messages se répéter, par contre quand le second client écrit des messages, le serveur ne lui renvoie rien.
