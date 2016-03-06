@@ -7,6 +7,25 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+void envoie_reponse(FILE * fclient, const char * phrase) {
+	fprintf(fclient, "<Alakazam> %s\n", phrase);
+}
+
+char * recois_requete(char * buffer , int size , FILE * stream) {
+
+	int i;
+	for(i = 0; i<size; ++i) {
+		buffer[i] = '\0';
+	}
+
+	fgets(buffer, size, stream); 
+	fflush(stdout);
+
+	if(buffer[0] == '\0')
+		exit(1);
+
+	return buffer;
+}
 
 void traitement_signal ( int sig ){
 int statut;
@@ -72,6 +91,7 @@ int creer_serveur(int port){
 	while(1){
 
 		int socket_client ;
+		FILE * fclient;
 		initialiser_signaux();
 		socket_client = accept(socket_serveur, NULL, NULL );
 		if(socket_client == -1)
@@ -89,31 +109,13 @@ int creer_serveur(int port){
 			write(socket_client, message_bienvenue, strlen (message_bienvenue));
 
 			char buf[512];
-			int fd;
-			/*if((fd = read(socket_client, buf, sizeof(buf)))==-1){
-
-				perror("erreur de lecture");
-				return 1;
-
-			} 
-			write(socket_client, buf, fd);*/
-			int leave =0;
-			while(leave ==0)
+			fclient = fdopen(socket_client, "w+");
+			while(recois_requete(buf, sizeof(buf)/sizeof(buf[0]), fclient))
 			{
-
-				if((fd = read(socket_client, buf, sizeof(buf)))==-1){
-
-					perror("erreur de lecture");
-					return 1;
-
-				} else if(fd==0)
-				{
-				leave =1;
-				exit(0);
-				}
-			buf[511] = '\0';
-
-			write(socket_client, buf, fd);
+						printf("message reçu\n");					
+						envoie_reponse(fclient, buf);
+						sleep(1);
+						printf("message envoyé\n");
 			}
 		}
 	}

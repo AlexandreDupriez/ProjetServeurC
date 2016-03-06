@@ -5,7 +5,7 @@ LD=gcc
 CFLAGS=-Wall -W -Werror
 LDFLAGS=
 # Le nom de l’exécutable à fabriquer
-EXE=Alakazam
+EXE=ProjetServeurC
 # Les variables HEADERS, CFILES et OBJS vont contenir respectivement
 # la listes des fichiers .h, .c et le nom des fichiers .o à fabriquer
 # On utilise la directive particulière $(wildcard ...) qui permet
