@@ -7,6 +7,33 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+
+int analyse_entete(const char * message){
+	
+	int nb_mots=0;
+	unsigned int i = 0;
+
+	if(strncmp(message, "GET ", 4) != 0)
+		return -1;
+
+	while(i<strlen(message)){
+		if(message[i]== ' ')
+			nb_mots++;
+		i++;
+    }
+		if(nb_mots!=2)
+			return -1;
+	i=0;
+	while(message[0]!='H'){
+		message++;
+	}
+	if((strncmp(message, "HTTP/1.0", 8) != 0) && (strncmp(message, "HTTP/1.1", 8) != 0))	
+		return -1;
+
+	return 0;
+
+}
+
 void envoie_reponse(FILE * fclient, const char * phrase) {
 	fprintf(fclient, "<Alakazam> %s\n", phrase);
 }
@@ -110,12 +137,17 @@ int creer_serveur(int port){
 
 			char buf[512];
 			fclient = fdopen(socket_client, "w+");
-			while(recois_requete(buf, sizeof(buf)/sizeof(buf[0]), fclient))
+	        //char * erreur ="HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 17\r\n400 Bad request\r\n";
+			char * message;
+			while((message=recois_requete(buf, sizeof(buf)/sizeof(buf[0]), fclient)))
 			{
-						printf("message reçu\n");					
-						envoie_reponse(fclient, buf);
+						printf("%s",message);
+						//printf("message reçu\n");
+						if(analyse_entete(message)==0)
+							//envoie_reponse(fclient, buf);
+						//envoie_reponse(fclient, buf);
 						sleep(1);
-						printf("message envoyé\n");
+						//printf("message envoyé\n");
 			}
 		}
 	}
