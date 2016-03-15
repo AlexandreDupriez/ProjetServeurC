@@ -36,16 +36,13 @@ int analyse_entete(const char * message){
     }
 		if(nb_mots!=2)
 			return -1;
-	//i=0;
-	/*while(message[0]!='H'){
-		message++;
-	}*/
+
 		delim = strtok(NULL," ");
 		if(strcmp("/",delim)!=0)
 			return 404;
 
 		delim = strtok(NULL," ");
-	if((strncmp(delim, "HTTP/1.0", 8) != 0) && (strncmp(delim, "HTTP/1.1", 8) != 0))	
+	if((strcmp(delim, "HTTP/1.0\n") != 0) && (strcmp(delim, "HTTP/1.1\n") != 0))	
 		return -1;
 
 	return 0;
@@ -83,10 +80,11 @@ int statut;
 }
 
 void initialiser_signaux(void){
-/*	if (signal(SIGPIPE,SIG_IGN)==SIG_ERR)
+
+	if (signal(SIGPIPE,SIG_IGN)==SIG_ERR)
 	{
 		perror("signal");
-	}*/
+	}
 
 	struct sigaction sa ;
 	sa.sa_handler = traitement_signal;
@@ -103,7 +101,6 @@ int creer_serveur(int port){
 
 	int socket_serveur;
 	socket_serveur = socket (AF_INET,SOCK_STREAM,0);
-	//initialiser_signaux();
 	if(socket_serveur == -1)
 	{
 		perror("socket_serveur");
@@ -148,13 +145,11 @@ int creer_serveur(int port){
 
 	char * message_bienvenue="\nBienvenue sur le serveur de Alexandre Dupriez et Bastien Dusart. Pour vous accueillir dans les meilleures conditions, nous vous offrons ce sublime poème:\n\nMa souris.\nMa souris s'est pendue ce matin.\nJe me doutais bien que quelque chose\nNe tournait pas rond. La mollette sans entrain,\nLe pointeur sans vigueur, tout semblait morose.\n\nEn allumant mon écran j'ai vite reconnu\nSon écriture en Gothic (12pts) en gras.\nC'était son testament, sa lettre de pendue\nQui, le clavier à se consoler, aidera.\n\nJe savais que la force de l'unité centrale\nEtait de rester d'une froide logique.\nMais, voyez-vous, ce petit animal\nAvait un cœur de braise, un grand sens de l'éthique.\n\nElle se sentait déconsidérée devant les raccourcis,\nSoutenant pourtant mon regard cathodique\nSon ventre de rubis glissait, si doux sur le tapis,\nMais le temps entamait sa destruction méthodique.\n\nJ'aurais aimé avoir le temps de te dire tout mon amour\nLorsque ma main te guidait doucement.\nJ'aurais aimé te dire que pour toujours\nJe me souviendrais du galbe de ton dos, tel un amant.\n\nTu es morte aujourd'hui, pendue au bout du tiroir.\nJe regarde gourmand, vers une belle remplaçante.\nNe t'inquiète pas, je n'oublierai jamais les soirs,\nOu de mes doigts, je caressais, léger, mon amante.\n\n\n";
 	char * message_400="\nHTTP/1.1 400 Bad Request\n\rConnection: close\n\rContent-Length: 17 \n\n\r400 Bad request\n\r";
-	char * message_404="\nHTTP/1.1 404 Not Found\n\rConnection: close\n\rContent-Length: 17 \n\n\r404 Not Found\n\r";
+	//char * message_404="\nHTTP/1.1 404 Not Found\n\rConnection: close\n\rContent-Length: 17 \n\n\r404 Not Found\n\r";
 	char * message_ok="\nHTTP/1.1 200 OK\n\rContent-Length: ";
 	int tour = 0;
 	int error400 = 1;
-	int error404 = 0;
-	//int taille_message = 0;
-
+	//int error404 = 0;
 
 		if(fork()==0){
 
@@ -165,26 +160,14 @@ int creer_serveur(int port){
 			{
 
 
-						/*if(message)
-							taille_message+=strlen(message);*/
-
-						//printf("%s",message);
-						//printf("message reçu\n");
-
-						if(error404==1 && ((strcmp(message,"\r\n")==0)||(strcmp(message,"\n")==0))){
+						/*if(error404==1 && ((strcmp(message,"\r\n")==0)||(strcmp(message,"\n")==0))){
 							envoie_reponse(fclient,message_404);
 							tour=0;
 							error404=0;
-						}
-						else if(error400==1 && ((strcmp(message,"\r\n")==0)||(strcmp(message,"\n")==0))){
-							//char str[15];
-							//sprintf(str, "%d", taille_message);
-							//char * message_end = concat(str,"\n\n\r400 Bad request\n\r");
-							//message_400 = concat(message_400,message_end);
+						}*/
+						if(error400==1 && ((strcmp(message,"\r\n")==0)||(strcmp(message,"\n")==0))){
 							envoie_reponse(fclient,message_400);
-							//message_400="\nHTTP/1.1 400 Bad Request\n\rConnection: close\n\rContent-Length: ";
 							tour=0;
-							//taille_message=0;
 						}
 						else if(error400==0 && ((strcmp(message,"\r\n")==0)||(strcmp(message,"\n")==0))){
 							char str[15];
@@ -195,21 +178,15 @@ int creer_serveur(int port){
 							message_ok="\nHTTP/1.1 200 OK\n\rContent-Length: ";
 							error400=1;
 							tour=0;
-							//taille_message=0;
-							//write(socket_client, message_bienvenue, strlen (message_bienvenue));
 							envoie_reponse(fclient,message_bienvenue);
 						}
 
 						if(analyse_entete(message)==0 && tour==0){
 							error400=0;
 						}
-						else if(analyse_entete(message)==404 && tour==0){
+						/*else if(analyse_entete(message)==404 && tour==0){
 							error404=1;
-						}
-
-						//envoie_reponse(fclient, buf);
-						//sleep(1);
-						//printf("message envoyé\n");
+						}*/
 
 						if(message && ((strcmp(message,"\r\n")!=0)&&(strcmp(message,"\n")!=0))){
 						tour++;
