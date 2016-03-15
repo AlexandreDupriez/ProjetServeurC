@@ -22,6 +22,7 @@ int analyse_entete(const char * message){
 	unsigned int i = 0;
 	char * delim;
 	char * buf;
+	int err404 = 0;
 
 	buf= strdup(message);
 	delim = strtok(buf," ");
@@ -39,11 +40,14 @@ int analyse_entete(const char * message){
 
 		delim = strtok(NULL," ");
 		if(strcmp("/",delim)!=0)
-			return 404;
+			err404=1;
 
 		delim = strtok(NULL," ");
 	if((strcmp(delim, "HTTP/1.0\n") != 0) && (strcmp(delim, "HTTP/1.1\n") != 0))	
 		return -1;
+
+	if(err404)
+		return 404;
 
 	return 0;
 
@@ -53,18 +57,13 @@ void envoie_reponse(FILE * fclient, const char * phrase) {
 	fprintf(fclient, "<Alakazam> %s\n", phrase);
 }
 
-char * recois_requete(char * buffer , int size , FILE * stream) {
+char * fgets_or_exit(char * buffer , int size , FILE * stream) {
 
-	int i;
-	for(i = 0; i<size; ++i) {
-		buffer[i] = '\0';
-	}
 
-	fgets(buffer, size, stream); 
+    if(fgets(buffer, size, stream) == NULL)
+    	exit(EXIT_FAILURE);
+	
 	fflush(stdout);
-
-	if(buffer[0] == '\0')
-		exit(1);
 
 	return buffer;
 }
@@ -156,7 +155,7 @@ int creer_serveur(int port){
 			char buf[512];
 			fclient = fdopen(socket_client, "w+");
 			char * message;
-			while((message=recois_requete(buf, sizeof(buf)/sizeof(buf[0]), fclient)))
+			while((message=fgets_or_exit(buf, sizeof(buf)/sizeof(buf[0]), fclient)))
 			{
 
 
