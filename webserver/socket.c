@@ -145,11 +145,11 @@ int creer_serveur(int port){
 
 	char * message_bienvenue="\nBienvenue sur le serveur de Alexandre Dupriez et Bastien Dusart. Pour vous accueillir dans les meilleures conditions, nous vous offrons ce sublime poème:\n\nMa souris.\nMa souris s'est pendue ce matin.\nJe me doutais bien que quelque chose\nNe tournait pas rond. La mollette sans entrain,\nLe pointeur sans vigueur, tout semblait morose.\n\nEn allumant mon écran j'ai vite reconnu\nSon écriture en Gothic (12pts) en gras.\nC'était son testament, sa lettre de pendue\nQui, le clavier à se consoler, aidera.\n\nJe savais que la force de l'unité centrale\nEtait de rester d'une froide logique.\nMais, voyez-vous, ce petit animal\nAvait un cœur de braise, un grand sens de l'éthique.\n\nElle se sentait déconsidérée devant les raccourcis,\nSoutenant pourtant mon regard cathodique\nSon ventre de rubis glissait, si doux sur le tapis,\nMais le temps entamait sa destruction méthodique.\n\nJ'aurais aimé avoir le temps de te dire tout mon amour\nLorsque ma main te guidait doucement.\nJ'aurais aimé te dire que pour toujours\nJe me souviendrais du galbe de ton dos, tel un amant.\n\nTu es morte aujourd'hui, pendue au bout du tiroir.\nJe regarde gourmand, vers une belle remplaçante.\nNe t'inquiète pas, je n'oublierai jamais les soirs,\nOu de mes doigts, je caressais, léger, mon amante.\n\n\n";
 	char * message_400="\nHTTP/1.1 400 Bad Request\n\rConnection: close\n\rContent-Length: 17 \n\n\r400 Bad request\n\r";
-	//char * message_404="\nHTTP/1.1 404 Not Found\n\rConnection: close\n\rContent-Length: 17 \n\n\r404 Not Found\n\r";
+	char * message_404="\nHTTP/1.1 404 Not Found\n\rConnection: close\n\rContent-Length: 17 \n\n\r404 Not Found\n\r";
 	char * message_ok="\nHTTP/1.1 200 OK\n\rContent-Length: ";
 	int tour = 0;
 	int error400 = 1;
-	//int error404 = 0;
+	int error404 = 0;
 
 		if(fork()==0){
 
@@ -160,12 +160,12 @@ int creer_serveur(int port){
 			{
 
 
-						/*if(error404==1 && ((strcmp(message,"\r\n")==0)||(strcmp(message,"\n")==0))){
+						if(error404==1 && ((strcmp(message,"\r\n")==0)||(strcmp(message,"\n")==0))){
 							envoie_reponse(fclient,message_404);
 							tour=0;
 							error404=0;
-						}*/
-						if(error400==1 && ((strcmp(message,"\r\n")==0)||(strcmp(message,"\n")==0))){
+						}
+						else if(error400==1 && ((strcmp(message,"\r\n")==0)||(strcmp(message,"\n")==0))){
 							envoie_reponse(fclient,message_400);
 							tour=0;
 						}
@@ -184,9 +184,9 @@ int creer_serveur(int port){
 						if(analyse_entete(message)==0 && tour==0){
 							error400=0;
 						}
-						/*else if(analyse_entete(message)==404 && tour==0){
+						else if(analyse_entete(message)==404 && tour==0){
 							error404=1;
-						}*/
+						}
 
 						if(message && ((strcmp(message,"\r\n")!=0)&&(strcmp(message,"\n")!=0))){
 						tour++;
