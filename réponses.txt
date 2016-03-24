@@ -1,7 +1,28 @@
+Chapitre 3
+
 1. On obtient le message d'erreur "bind socket_serveur", ce qui signifie que la socket n'a pu être créée. Il y a un délai d'attente pour pouvoir relancer le serveur. 
 
 2. Rien ne s'affiche car l'option "z" signifie que le client va uniquement scanner l'existence du serveur sans envoyer de données.
 
-3. Telnet ne fonctionne pas sur les ordinateurs de l'iut, nous le testerons plus tard.
+3. Telnet renvoie une erreur car on écoute sur du ipv4.
 
 4. Lorsqu'on lance simultanément deux clients sur le serveur, le premier qui se connecte voit ses messages se répéter, par contre quand le second client écrit des messages, le serveur ne lui renvoie rien.
+
+Chapitre 5
+
+3.
+GET / HTTP/1.1
+User-Agent: curl/7.40.0
+Host: localhost:8080
+Accept: */*
+
+4.
+"méthode" "chemin du fichier demandé" "protocole/version"
+
+Chapitre 7
+
+2. Il s'affiche mais n'est pas mis en forme, il faut spécifier une valeur de contenu pour que le navigateur sache comment afficher le fichier, on spécifie donc un Content-type en plus du Content-lenght.
+
+3. Encore une fois 404 NOT FOUND, on tente d'accéder à un fichier non existant, il faut donc transformer "/" en "index.html" pour rediriger le client vers la page d'accueil lorsqu'il lance une requête sur la racine du site.
+
+4.C'est une faille dans le serveur qui pourrait conduire un pirate à s'emparer des identifiants d'accès au serveur, il faut donc empêcher celui-ci ce pouvoir remonter dans un dossier en proscrivant les "..".
