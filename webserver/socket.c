@@ -6,7 +6,8 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #include "socket.h"
 
@@ -54,6 +55,16 @@ int analyse_GET(const char * buf, http_request * request) {
 	return 0;
 }
 
+char *rewrite_url(char *url){
+	if(strcmp(url, "/") == 0)
+		return "/index.html";
+	char *shorturl = strchr(url, '?');
+	if(shorturl == NULL)
+		return url;
+	url[(shorturl - url)] = '\0';
+	return url;
+}
+
 int trois_mots(const char * buf, http_request * request) {
 	
 	char * delim;
@@ -68,7 +79,8 @@ int trois_mots(const char * buf, http_request * request) {
 	request->url = delim;
 	printf("%s\n", request->url);
 
-
+	if(strcmp(request->url,"/")==0)
+		request->url = rewrite_url(request->url);
 
 	if((delim = strtok(NULL," "))==NULL)
 		return -1;
@@ -103,7 +115,7 @@ int analyse_HTTP(const char * buf, http_request * request) {
 		if(strcmp(delim, "HTTP/1.0\r\n") == 0){
 			request->major_version = 1;
 			request->minor_version = 0;
-		}else if(strcmp(delim, "HTTP/1.1\n") == 0){
+		}else if(strcmp(delim, "HTTP/1.1\r\n") == 0){
 			request->major_version = 1;
 			request->minor_version = 1;
 		}
@@ -118,7 +130,6 @@ int analyse_HTTP(const char * buf, http_request * request) {
 int parse_http_request(const char *request_line , http_request *request)
 {
 	analyse_GET(request_line, request);
-	printf("%d %d",trois_mots(request_line, request),analyse_HTTP(request_line, request));
  	if(trois_mots(request_line, request)!=0 || analyse_HTTP(request_line, request)!=0)
 		return -1;
 	return 0;
@@ -144,6 +155,54 @@ void send_response(FILE *client , int code , const  char *reason_phrase , const 
   fflush(client);  
 }
 
+int check_and_open(const char *url, const char *document_root){
+	char path[strlen(document_root)+strlen(url)+1];
+	sprintf(path, "%s%s", document_root, url);
+
+	struct stat stats;
+	stat(path, &stats);
+	if(S_ISREG(stats.st_mode))
+		return open(path, O_RDONLY);
+	return -1;
+}
+
+int get_file_size(int fd){
+	struct stat stats;
+	fstat(fd, &stats);
+	return stats.st_size;
+}
+
+int copy(int in, int out){
+	char buf[256];
+	int reader;
+	//memset(buf, 0, 256);
+	while((reader = read(in, buf, 256)) >= 0){
+		if(write(out, buf, reader) == -1){
+			perror("erreur d'écriture");
+			return -1;
+		}
+	}
+	return 0;
+}
+
+int url_ok_or_not(char *url){
+	return strstr(url, "..") == NULL;
+}
+
+const char *file_content(char *file){
+	char *extension = strrchr(file, '.');
+	if(strcmp(extension,".css") == 0)
+		return "text/css";
+	else if(strcmp(extension,".html") == 0)
+		return "text/html";
+	else if(strcmp(extension,".js") == 0)
+		return "application/javascript";
+	else if(strcmp(extension,".jpg") == 0)
+		return "image/jpeg";
+	else if(strcmp(extension,".png") == 0)
+		return "image/png";
+	return "text";
+}
 
 int creer_serveur(int port){
 
@@ -215,10 +274,19 @@ int creer_serveur(int port){
 					send_response(client, 400, "Bad Request", "Bad request");
 				else if (request.method == HTTP_UNSUPPORTED)
 					send_response(client, 405, "Method Not Allowed", "Method Not Allowed");
-				else if (strcmp(request.url , "/") == 0)
-					send_response(client, 200, "OK", "Bienvenue");
-				else
-					send_response(client, 404, "Not Found", "Not Found");
+				else if (!url_ok_or_not(request.url))
+					send_response(client, 403, "Forbidden", "Forbidden");
+				else{
+					int fd = check_and_open(request.url, "public");
+					if(fd < 0)
+						send_response(client, 404, "Not Found", "Not Found");
+					else {
+						send_status(client, 200, "OK");
+						fprintf(client, "Connection: close\r\nContent-type: %s\r\nContent-length: %d\r\n\r\n", file_content(request.url), get_file_size(fd));
+						fflush(client);
+						copy(fd, socket_client);			
+					}
+				}
 
 				fclose(client);
 
