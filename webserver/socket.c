@@ -103,7 +103,7 @@ int analyse_HTTP(const char * buf, http_request * request) {
 		if(strcmp(delim, "HTTP/1.0\r\n") == 0){
 			request->major_version = 1;
 			request->minor_version = 0;
-		}else if(strcmp(delim, "HTTP/1.1\n") == 0){
+		}else if(strcmp(delim, "HTTP/1.1\r\n") == 0){
 			request->major_version = 1;
 			request->minor_version = 1;
 		}
