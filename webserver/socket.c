@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+
 #include "socket.h"
 
 
@@ -97,6 +98,19 @@ int analyse_HTTP(const char * buf, http_request * request) {
 
 		return 0;
 	}
+	else if(strcmp(delim, "HTTP/1.1\r\n") == 0 || strcmp(delim, "HTTP/1.0\r\n") == 0) {
+
+		if(strcmp(delim, "HTTP/1.0\r\n") == 0){
+			request->major_version = 1;
+			request->minor_version = 0;
+		}else if(strcmp(delim, "HTTP/1.1\n") == 0){
+			request->major_version = 1;
+			request->minor_version = 1;
+		}
+
+		return 0;
+	}
+
 	return -1;
 }
 
@@ -104,6 +118,7 @@ int analyse_HTTP(const char * buf, http_request * request) {
 int parse_http_request(const char *request_line , http_request *request)
 {
 	analyse_GET(request_line, request);
+	printf("%d %d",trois_mots(request_line, request),analyse_HTTP(request_line, request));
  	if(trois_mots(request_line, request)!=0 || analyse_HTTP(request_line, request)!=0)
 		return -1;
 	return 0;
@@ -128,6 +143,7 @@ void send_response(FILE *client , int code , const  char *reason_phrase , const 
   fprintf(client, message_body);
   fflush(client);  
 }
+
 
 int creer_serveur(int port){
 
@@ -203,6 +219,8 @@ int creer_serveur(int port){
 					send_response(client, 200, "OK", "Bienvenue");
 				else
 					send_response(client, 404, "Not Found", "Not Found");
+
+				fclose(client);
 
 		}
 
